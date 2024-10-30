@@ -12,11 +12,11 @@ import { ConnectedEntityData } from 'src/common/connection-handler/connection.ty
 import {
   FROM_PLAYER_EVENT_TYPES,
   TO_PLAYER_EVENT_TYPES,
-} from 'src/common/events/player.events';
+} from 'src/common/events/type/player.event-type';
 import {
-  ToPlayerGenericMessage,
-  ToPlayerServerStatus,
-} from 'src/common/message/player.message';
+  ToPlayerGenericEvent,
+  ToPlayerServerStatusEvent,
+} from 'src/common/events/player.event';
 import { PlayerData } from 'src/modules/player-gateway/types/player.types';
 
 @WebSocketGateway({ namespace: 'gateway', cors: true })
@@ -44,30 +44,18 @@ export class PlayerGateway implements OnGatewayConnection, OnGatewayDisconnect {
     );
   }
 
-  // async emitThingToEveryone() {
-  //   const playerCount =
-  //     await this.playerGatewayService.connectionHandler.getEntityCount();
-  //   const socketCount =
-  //     await this.playerGatewayService.connectionHandler.getSocketCount();
-  //   this.server.emit('connected-players', {
-  //     playerCount,
-  //     socketCount,
-  //   });
-  // }
-
   @SubscribeMessage(FROM_PLAYER_EVENT_TYPES.GENERIC_MESSAGE)
-  private async onGenericMessage(
-    socket: Socket,
-    message: ToPlayerGenericMessage,
-  ) {
-    this.playerGatewayService.handleGenericMessage(socket.id, message);
+  private async onGenericEvent(socket: Socket, event: ToPlayerGenericEvent) {
+    console.log(event, 1111);
+    this.playerGatewayService.handleGenericEvent(socket.id, event);
   }
 
   @SubscribeMessage(FROM_PLAYER_EVENT_TYPES.GAME_SERVER_STATUS)
-  private async onGetAuth(): Promise<ToPlayerServerStatus> {
+  private async onGetAuth(): Promise<ToPlayerServerStatusEvent> {
     return Promise.resolve({
       type: TO_PLAYER_EVENT_TYPES.GAME_SERVER_STATUS,
-      data: {
+      id: '0',
+      message: {
         status: true,
       },
     });

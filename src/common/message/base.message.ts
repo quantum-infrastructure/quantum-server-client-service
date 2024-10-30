@@ -1,4 +1,4 @@
-export type BaseSocketMessage<T = unknown> = {
+export type BaseMessage<T = unknown> = {
   type: string;
   data?: T;
 };

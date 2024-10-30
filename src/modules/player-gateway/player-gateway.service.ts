@@ -1,10 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { ConnectionHandler } from 'src/common/connection-handler/connection-handler';
 import {
-  FromPlayerGenericMessage,
-  ToPlayerBaseMessage,
-} from 'src/common/message/player.message';
-import { TO_PLAYER_EVENT_TYPES } from 'src/common/events/player.events';
+  FromPlayerGenericEvent,
+  ToPlayerBaseEvens,
+} from 'src/common/events/player.event';
+import { TO_PLAYER_EVENT_TYPES } from 'src/common/events/type/player.event-type';
 import { PlayerData } from 'src/modules/player-gateway/types/player.types';
 import { RedisService } from 'src/modules/redis/redis.service';
 import { Socket } from 'socket.io';
@@ -23,10 +23,7 @@ export class PlayerGatewayService {
     this.connectionHandler = new ConnectionHandler<PlayerData>();
   }
 
-  async handleGenericMessage(
-    socketId: string,
-    message: FromPlayerGenericMessage,
-  ) {
+  async handleGenericEvent(socketId: string, event: FromPlayerGenericEvent) {
     const playerData =
       await this.connectionHandler.getEntityDataBySocketId(socketId);
     if (!playerData) {
@@ -35,15 +32,16 @@ export class PlayerGatewayService {
 
     await this.redisService.client.rPush(
       getGameInstanceMessagesKey(playerData.data.gameInstance?.id),
-      JSON.stringify({
-        type: 'generic-message',
-        data: message,
-        playerId: playerData.id,
-      }),
+      // JSON.stringify({
+      //   type: BASE_EVENT_TYPES.GENERIC_MESSAGE,
+      //   message: event.message,
+      //   playerId: playerData.id,
+      // }),
+      JSON.stringify(event),
     );
   }
 
-  async handleGetAuth(socketId: string): Promise<ToPlayerBaseMessage> {
+  async handleGetAuth(socketId: string): Promise<ToPlayerBaseEvens> {
     const playerData =
       await this.connectionHandler.getEntityDataBySocketId(socketId);
     if (!playerData) {
@@ -52,6 +50,7 @@ export class PlayerGatewayService {
 
     return {
       type: TO_PLAYER_EVENT_TYPES.GAME_SERVER_STATUS,
+      id: '0',
     };
   }
 

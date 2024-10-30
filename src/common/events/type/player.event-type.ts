@@ -1,4 +1,4 @@
-import { BASE_EVENT_TYPES } from './base.events';
+import { BASE_EVENT_TYPES } from './base.event-type';
 
 export const PLAYER_EVENT_TYPES = {
   ...BASE_EVENT_TYPES,

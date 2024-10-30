@@ -12,7 +12,7 @@ export class ConfigService {
 
   private getConfig(): AppConfig {
     return {
-      apiPort: parseInt(process.env.API_PORT, 10) || 3000,
+      apiPort: parseInt(process.env.API_PORT, 10) || 3005,
       redis: {
         redisHost: process.env.REDIS_HOST || 'localhost',
         redisPort: parseInt(process.env.REDIS_PORT) || 6379,
