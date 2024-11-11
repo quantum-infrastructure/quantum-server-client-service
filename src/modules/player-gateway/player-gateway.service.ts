@@ -32,12 +32,14 @@ export class PlayerGatewayService {
 
     await this.redisService.client.rPush(
       getGameInstanceMessagesKey(playerData.data.gameInstance?.id),
-      // JSON.stringify({
-      //   type: BASE_EVENT_TYPES.GENERIC_MESSAGE,
-      //   message: event.message,
-      //   playerId: playerData.id,
-      // }),
-      JSON.stringify(event),
+       JSON.stringify({
+         //type: BASE_EVENT_TYPES.GENERIC_MESSAGE,
+         type: event.type,
+         id: event.id,
+         message: event.message,
+         playerId: playerData.id,
+       }),
+      //JSON.stringify(event),
     );
   }
 
