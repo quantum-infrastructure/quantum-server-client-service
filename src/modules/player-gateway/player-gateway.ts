@@ -18,13 +18,18 @@ import {
   ToPlayerServerStatusEvent,
 } from 'src/common/events/player.event';
 import { PlayerData } from 'src/modules/player-gateway/types/player.types';
+import { invokeAuthenticationLambda } from 'src/modules/player-gateway/helper-methods/authentication-request';
+import { ConfigService } from 'src/modules/config/config.service';
 
 @WebSocketGateway({ namespace: 'gateway', cors: true })
 export class PlayerGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer()
   private server: Server;
 
-  constructor(private playerGatewayService: PlayerGatewayService) {}
+  constructor(
+    private playerGatewayService: PlayerGatewayService,
+    private configService: ConfigService,
+  ) {}
 
   async handleDisconnect(socket: Socket) {
     await this.playerGatewayService.handlePlayerDisconnect(socket.id);
@@ -32,21 +37,23 @@ export class PlayerGateway implements OnGatewayConnection, OnGatewayDisconnect {
   }
 
   async handleConnection(socket: Socket) {
-    const authentication = await this.verifyAuthToken(socket.handshake.auth);
+    if (!socket.handshake?.auth?.authToken) {
+      return socket.disconnect();
+    }
 
+    const authentication = await this.verifyAuthToken(socket.handshake.auth);
     if (!authentication) {
       return socket.disconnect();
     }
     await this.playerGatewayService.handlePlayerConnect(
       socket,
-      authentication.data.id,
+      authentication.id,
       authentication.data,
     );
   }
 
   @SubscribeMessage(FROM_PLAYER_EVENT_TYPES.GENERIC_MESSAGE)
   private async onGenericEvent(socket: Socket, event: ToPlayerGenericEvent) {
-    console.log(event, 1111);
     this.playerGatewayService.handleGenericEvent(socket.id, event);
   }
 
@@ -64,21 +71,35 @@ export class PlayerGateway implements OnGatewayConnection, OnGatewayDisconnect {
   public async verifyAuthToken(
     auth: unknown,
   ): Promise<ConnectedEntityData<PlayerData>> {
-    // THIS METHOD WILL CALL LAMBDA LATER
-    const { authToken } = auth as any;
-    if (authToken < 10) {
-      return null;
+    if (this.configService.config.environment == 'dev') {
+      // HANDLE DEV ENVIRONMENT
+      const { authToken } = auth as any;
+      if (authToken < 10) {
+        return null;
+      }
+      return {
+        id: authToken,
+        data: {
+          id: authToken,
+          additionalData: {
+            name: `name-${authToken}`,
+          },
+        },
+      };
     }
 
+    const response = await invokeAuthenticationLambda({
+      authenticationParams: auth as any,
+      lambdaFunctionArn:
+        this.configService.config.authentication.lambdaFunctionArn,
+      region: this.configService.config.aws.region,
+    });
+
+    if (!response) {
+      return null;
+    }
     return {
-      id: authToken,
-      data: {
-        id: authToken,
-        name: 'id' + authToken,
-        gameInstance: {
-          id: 'entry1',
-        },
-      },
+      ...response,
     };
   }
 }

@@ -1,7 +1,9 @@
 export type PlayerData = {
   id: string;
-  name: string;
   gameInstance?: {
     id: string;
+  };
+  additionalData?: {
+    [key: string]: any;
   };
 };
