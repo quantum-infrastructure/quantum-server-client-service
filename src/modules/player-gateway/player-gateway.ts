@@ -56,6 +56,10 @@ export class PlayerGateway implements OnGatewayConnection, OnGatewayDisconnect {
   private async onGenericEvent(socket: Socket, event: ToPlayerGenericEvent) {
     this.playerGatewayService.handleGenericEvent(socket.id, event);
   }
+  // @SubscribeMessage(FROM_PLAYER_EVENT_TYPES.CONNECT_TO_GAME_INSTANCE)
+  // private async onGameInstanceConnectEvent(socket: Socket, event: ToPlayerGenericEvent) {
+  //   this.playerGatewayService.handleGenericEvent(socket.id, event);
+  // }
 
   @SubscribeMessage(FROM_PLAYER_EVENT_TYPES.GAME_SERVER_STATUS)
   private async onGetAuth(): Promise<ToPlayerServerStatusEvent> {

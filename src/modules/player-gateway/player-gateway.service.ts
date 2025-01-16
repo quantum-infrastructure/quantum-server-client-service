@@ -89,6 +89,18 @@ export class PlayerGatewayService {
     }
   }
 
+  async handlePlayerConnectServer(playerId: string, serverId: string) {
+    const connectedPlayer =
+      await this.connectionHandler.getEntityData(playerId);
+    if (connectedPlayer.data.gameInstance) {
+      await addPlayerToGameInstance(
+        this.redisService.client,
+        connectedPlayer.data,
+        serverId,
+      );
+    }
+  }
+
   async handlePlayerDisconnect(socketId: string) {
     const playerData =
       await this.connectionHandler.getEntityDataBySocketId(socketId);

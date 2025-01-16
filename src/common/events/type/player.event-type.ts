@@ -3,6 +3,7 @@ import { BASE_EVENT_TYPES } from './base.event-type';
 export const PLAYER_EVENT_TYPES = {
   ...BASE_EVENT_TYPES,
   GAME_SERVER_STATUS: 'game-server-status',
+  CONNECT_TO_GAME_INSTANCE: 'connect-to-game-instance',
 } as const;
 
 export const TO_PLAYER_EVENT_TYPES = {
