@@ -8,5 +8,5 @@ export type ToPlayerServerStatusEvent = BaseEvent<{
   status: boolean;
 }>;
 
-export type FromPlayerGenericEvent = FromPlayerBaseEvent<unknown>;
-export type FromPlayerServerStatusEvent = FromPlayerBaseEvent<undefined>;
+export type FromPlayerGenericEvent<T = unknown> = FromPlayerBaseEvent<T>;
+export type FromPlayerServerStatusEvent<T = unknown> = FromPlayerBaseEvent<T>;

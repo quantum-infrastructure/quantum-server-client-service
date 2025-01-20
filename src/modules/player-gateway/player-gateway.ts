@@ -14,6 +14,7 @@ import {
   TO_PLAYER_EVENT_TYPES,
 } from 'src/common/events/type/player.event-type';
 import {
+  FromPlayerGenericEvent,
   ToPlayerGenericEvent,
   ToPlayerServerStatusEvent,
 } from 'src/common/events/player.event';
@@ -56,10 +57,28 @@ export class PlayerGateway implements OnGatewayConnection, OnGatewayDisconnect {
   private async onGenericEvent(socket: Socket, event: ToPlayerGenericEvent) {
     this.playerGatewayService.handleGenericEvent(socket.id, event);
   }
-  // @SubscribeMessage(FROM_PLAYER_EVENT_TYPES.CONNECT_TO_GAME_INSTANCE)
-  // private async onGameInstanceConnectEvent(socket: Socket, event: ToPlayerGenericEvent) {
-  //   this.playerGatewayService.handleGenericEvent(socket.id, event);
-  // }
+
+  @SubscribeMessage(FROM_PLAYER_EVENT_TYPES.CONNECT_TO_GAME_INSTANCE)
+  private async onGameInstanceConnectEvent(
+    socket: Socket,
+    event: FromPlayerGenericEvent<{
+      serverId: string;
+    }>,
+  ) {
+    const serverId = event.message?.serverId;
+    if (!serverId) {
+      return {
+        success: false,
+      };
+    }
+    await this.playerGatewayService.handlePlayerConnectServer(
+      socket.id,
+      serverId,
+    );
+    return {
+      success: true,
+    };
+  }
 
   @SubscribeMessage(FROM_PLAYER_EVENT_TYPES.GAME_SERVER_STATUS)
   private async onGetAuth(): Promise<ToPlayerServerStatusEvent> {
