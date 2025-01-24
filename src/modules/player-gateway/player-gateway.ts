@@ -62,18 +62,26 @@ export class PlayerGateway implements OnGatewayConnection, OnGatewayDisconnect {
   private async onGameInstanceConnectEvent(
     socket: Socket,
     event: FromPlayerGenericEvent<{
-      serverId: string;
+      gameInstanceId: string;
     }>,
   ) {
-    const serverId = event.message?.serverId;
-    if (!serverId) {
+    const gameInstanceId = event.message?.gameInstanceId;
+    if (!gameInstanceId) {
       return {
         success: false,
       };
     }
+    const player = await this.playerGatewayService.connectionHandler.getEntityDataBySocketId(socket.id);
+    if (!player)
+    {
+      return {
+        success: false,
+      };
+    }
+
     await this.playerGatewayService.handlePlayerConnectServer(
-      socket.id,
-      serverId,
+      player.id,
+      gameInstanceId,
     );
     return {
       success: true,
