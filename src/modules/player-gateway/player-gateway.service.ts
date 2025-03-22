@@ -29,6 +29,7 @@ export class PlayerGatewayService {
     if (!playerData) {
       return;
     }
+
     await this.redisService.client.rPush(
       getGameInstanceMessagesKey(playerData.data.gameInstance?.id),
       JSON.stringify({
@@ -88,7 +89,7 @@ export class PlayerGatewayService {
     }
   }
 
-  async handlePlayerConnectServer(playerId: string, gameInstanceId: string) {
+  async handlePlayerConnectToGameInstance(playerId: string, gameInstanceId: string) {
     const connectedPlayer =
       await this.connectionHandler.getEntityData(playerId);
     connectedPlayer.data.gameInstance = { id : gameInstanceId };

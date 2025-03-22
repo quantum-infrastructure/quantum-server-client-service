@@ -55,6 +55,7 @@ export class PlayerGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   @SubscribeMessage(FROM_PLAYER_EVENT_TYPES.GENERIC_MESSAGE)
   private async onGenericEvent(socket: Socket, event: ToPlayerGenericEvent) {
+
     this.playerGatewayService.handleGenericEvent(socket.id, event);
   }
 
@@ -62,24 +63,29 @@ export class PlayerGateway implements OnGatewayConnection, OnGatewayDisconnect {
   private async onGameInstanceConnectEvent(
     socket: Socket,
     event: FromPlayerGenericEvent<{
-      gameInstanceId: string;
+      data: {
+        gameInstanceId: string;
+      }
+      
     }>,
   ) {
-    const gameInstanceId = event.message?.gameInstanceId;
+    const gameInstanceId = event.message?.data.gameInstanceId;
     if (!gameInstanceId) {
       return {
         success: false,
       };
     }
-    const player = await this.playerGatewayService.connectionHandler.getEntityDataBySocketId(socket.id);
-    if (!player)
-    {
+    const player =
+      await this.playerGatewayService.connectionHandler.getEntityDataBySocketId(
+        socket.id,
+      );
+    if (!player) {
       return {
         success: false,
       };
     }
 
-    await this.playerGatewayService.handlePlayerConnectServer(
+    await this.playerGatewayService.handlePlayerConnectToGameInstance(
       player.id,
       gameInstanceId,
     );
@@ -125,7 +131,7 @@ export class PlayerGateway implements OnGatewayConnection, OnGatewayDisconnect {
         this.configService.config.authentication.lambdaFunctionArn,
       region: this.configService.config.aws.region,
     });
-
+    console.log("response from Lambda => ", response)
     if (!response) {
       return null;
     }
